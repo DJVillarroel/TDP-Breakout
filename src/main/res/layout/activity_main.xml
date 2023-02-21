@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:orientation="vertical"
+    android:background="@color/black"
+    android:gravity="center">
+
+    <ImageView
+        android:layout_width="324dp"
+        android:layout_height="228dp"
+        android:rotationX="17"
+        app:srcCompat="@drawable/arkanoid" />
+
+    <Button
+        android:layout_width="187dp"
+        android:layout_height="81dp"
+        android:backgroundTint="#621d67"
+        android:fontFamily="@font/arka_solid"
+        android:onClick="StartGame"
+        android:rotationX="8"
+        android:text="Iniciar"
+        android:textColor="@android:color/white"
+        android:textSize="32sp" />
+
+
+</LinearLayout>
