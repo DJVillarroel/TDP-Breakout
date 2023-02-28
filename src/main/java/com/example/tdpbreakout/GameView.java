@@ -3,6 +3,7 @@ package com.example.tdpbreakout;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -28,7 +29,9 @@ public class GameView extends View{
     protected Paint scoreText = new Paint();
     protected int TEXT_SIZE = 50;
     protected int scrWidth, scrHeight;
+    protected LinkedList<Bitmap> brickImgBank = new LinkedList<Bitmap>();
     protected LinkedList<MediaPlayer> sndBank = new LinkedList<MediaPlayer>();
+    protected LinkedList<Bitmap> powerUpImgBank = new LinkedList<Bitmap>();
 
 
     public GameView(Context context){
@@ -46,7 +49,16 @@ public class GameView extends View{
         game = new Game(this);
         game.createPaddle(BitmapFactory.decodeResource(getResources(), R.drawable.paddle));
         game.createBall(BitmapFactory.decodeResource(getResources(), R.drawable.ball));
-        game.createBricks(BitmapFactory.decodeResource(getResources(), R.drawable.brickb));
+        setBrickBank(BitmapFactory.decodeResource(getResources(), R.drawable.bricks));
+        setBrickBank(BitmapFactory.decodeResource(getResources(), R.drawable.brickg));
+        setBrickBank(BitmapFactory.decodeResource(getResources(), R.drawable.bricko));
+        setBrickBank(BitmapFactory.decodeResource(getResources(), R.drawable.brickp));
+        setBrickBank(BitmapFactory.decodeResource(getResources(), R.drawable.brickr));
+        setBrickBank(BitmapFactory.decodeResource(getResources(), R.drawable.brickb));
+        game.createBricks(brickImgBank);
+        setPUpBank(BitmapFactory.decodeResource(getResources(), R.drawable.lives));
+        setPUpBank(BitmapFactory.decodeResource(getResources(), R.drawable.slow));
+        setPUpBank(BitmapFactory.decodeResource(getResources(), R.drawable.barrier));
         setSndBank(MediaPlayer.create(context, R.raw.sndmiss));
         setSndBank(MediaPlayer.create(context, R.raw.sndhit));
         setSndBank(MediaPlayer.create(context, R.raw.sndpaddle));
@@ -61,23 +73,34 @@ public class GameView extends View{
 
     }
 
+
     @Override
     //Movimiento de la paleta
     public boolean onTouchEvent(MotionEvent event){
         game.movePaddle(event);
         return true;
     }
+
+    //Devuelve el ancho de la pantalla
     public int getScrWidth(){return scrWidth;}
 
+    //Devuelve el alto de la pantalla
     public int getScrHeight(){return scrHeight;}
+
     //Reproduce un sonido del banco de sonidos
     public void playSnd(int pos){
         if (sndBank.get(pos) !=null) sndBank.get(pos).start();
     }
+
+    //Muestra en pantalla la cantidad de vidas
     public void drawLives(Canvas canvas, String lives){
         canvas.drawText(lives, scrWidth-25,50, liveText);
     }
 
+    //Devuelve una lista de sprites para los powerups
+    public LinkedList<Bitmap> getPUpList(){return powerUpImgBank;}
+
+    //Muestra en pantalla la puntuación
     public void drawScore(Canvas canvas, String score){
         canvas.drawText(score, 25,50, scoreText);
     }
@@ -101,26 +124,31 @@ public class GameView extends View{
             drawScore(canvas, ""+game.getScore());
             drawLives(canvas, ""+game.getLives());
         }
-        /*
-        if (game.getPower()!=null && game.getPower().isVisible()){
-            canvas.drawBitmap(power.getSprite(), power.getX(), power.getY(), null);
+        if (!game.getPupList().isEmpty()){
+            for(PowerUp pup:game.getPupList()){
+                if (pup.isVisible()) canvas.drawBitmap(pup.getSprite(), pup.getX(), pup.getY(), null);
+            }
         }
-        */
         game.ballMovement();
-
-
-
+        game.powerUpMovement();
     }
 
+
+    //Incluye un sonido recibido por parametro en el banco de sonidos
     private void setSndBank(MediaPlayer snd){
         sndBank.add(snd);
     }
+
+    //Incluye un sprite recibido por parametro en el banco de sprites de powerups
+    private void setPUpBank(Bitmap sprite){powerUpImgBank.add(sprite);}
+
+    private void setBrickBank(Bitmap sprite){brickImgBank.add(sprite);}
 
     //Hará una llamada a la escena de gameOver
     private void gameOver() {
         handler.removeCallbacksAndMessages(null);
         Intent intent = new Intent(context, GameOver.class);
-        intent.putExtra("Points", game.getScore());
+        intent.putExtra("points", game.getScore());
         context.startActivity(intent);
         ((Activity) context).finish();
     }

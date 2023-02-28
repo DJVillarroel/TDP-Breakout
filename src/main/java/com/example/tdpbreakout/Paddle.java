@@ -13,4 +13,11 @@ public class Paddle extends Entity{
         height = sprite.getHeight();
     }
 
+
+    public boolean collides(PowerUp p){
+        return ((p.getX() + p.getWidth()) >= x)
+                && (p.getX() <= (x + width))
+                && ((p.getY() + p.getHeight()) >= y)
+                && ((p.getY() + p.getHeight()) < (y + height));
+    }
 }

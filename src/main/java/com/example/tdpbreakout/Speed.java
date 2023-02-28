@@ -2,11 +2,10 @@ package com.example.tdpbreakout;
 
 import android.graphics.Bitmap;
 
-public class Live extends PowerUp{
+public class Speed extends PowerUp{
+    private static final String effect = "speed";
 
-    private static final String effect = "1up";
-
-    public Live(Bitmap bitmap){
+    public Speed(Bitmap bitmap){
         sprite = bitmap;
         width = sprite.getWidth();
         height = sprite.getHeight();
@@ -19,6 +18,6 @@ public class Live extends PowerUp{
 
     @Override
     public void fallDown() {
-        y+=12;
+        y+=8;
     }
 }

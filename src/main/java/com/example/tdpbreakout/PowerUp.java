@@ -6,6 +6,8 @@ public abstract class PowerUp extends ActivableEntity{
 
     protected int timer;
 
-    public abstract void activateEffect();
+    public abstract String giveEffect();
+
+    public abstract void fallDown();
 
 }
