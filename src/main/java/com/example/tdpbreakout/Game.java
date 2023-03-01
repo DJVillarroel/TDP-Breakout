@@ -2,11 +2,16 @@ package com.example.tdpbreakout;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import java.util.LinkedList;
 import java.util.Random;
 
+
+/*
+    @Class Game, lógica del juego
+ */
 public class Game {
 
     protected GameView myGui;
@@ -16,9 +21,10 @@ public class Game {
     protected Paddle paddle;
     protected float oldPaddleX, oldX; //Usados por la paleta para calcular posiciones
     protected Ball ball;
-    protected Velocity velocity = new Velocity(15, 20); //Usado para la velocidad de la bola
+    protected Velocity velocity = new Velocity(15, 15); //Usado para la velocidad de la bola
     protected Brick[] bricks = new Brick[66];
     protected LinkedList<PowerUp> pupList = new LinkedList<PowerUp>();
+    protected ActivableEntity barrier;
     protected int numBricks = 0;
     protected int brokenBricks;
     protected Random rng;
@@ -28,6 +34,7 @@ public class Game {
         lives = 3;
         score = 0;
         gameOver = false;
+        barrier = new BarrierObj(null);
         rng = new Random();
     }
 
@@ -121,7 +128,11 @@ public class Game {
 
     //Activa el efecto de acelerar la bola
     public void speedUp(){
-        velocity.setY(velocity.getY()+5);
+        if(velocity.getY()<16 && velocity.getY()>-15){ //La velocidad de la bola no debe ser mayor a su tamaño
+            if (velocity.getY()<0) velocity.setY(velocity.getY()-5);
+            else velocity.setY(velocity.getY()+5);
+        }
+
     }
 
     //Retorna un Brick en la posición pasada por parametro
@@ -137,16 +148,27 @@ public class Game {
     //Devuelve un booleano verdadero si se ha creado el powerup falso en caso contrario
     public boolean createPowerup(LinkedList<Bitmap> sprBank){
         boolean created = false;
-        if (pupList.size() <= 10) {
+        if (pupList.size() < 10) {
             PowerUp pUp;
             int probability = rng.nextInt(100);
-            if (probability <= 33) pUp = new Live(sprBank.get(0));
-            if (probability <= 66) pUp = new Speed(sprBank.get(1));
-            else pUp = new Live(sprBank.get(2));
+            Log.d("MESSI", ""+probability);
+            if (probability <= 25) pUp = new Live(sprBank.get(0));
+            else if (probability <= 70) pUp = new Speed(sprBank.get(1));
+            else pUp = new Barrier(sprBank.get(2));
             pupList.add(pUp);
             created=true;
         }
         return created;
+    }
+
+    //Si no existe barrera, la creará, si existe pero está desactivada, la activará
+    public void setBarrier(){
+        barrier.setVisible();
+    }
+
+    //Chequea la visibilidad de la bola y devuelve un booleano
+    public boolean isBarrierVisible(){
+        return barrier.isVisible();
     }
 
     //Retorna la lista de PowerUps
@@ -177,15 +199,24 @@ public class Game {
 
         //Si la bola se escapa por debajo de la pantalla, reaparecerá con una dirección aleatoria
         if (ball.missesPaddle(paddle)) {
-            ball.setX(1 + rng.nextInt(myGui.getScrWidth() - ball.getWidth() - 1));
-            ball.setY(myGui.getScrHeight() / 3);
-            velocity.setX(xVelocity());
-            velocity.setY(20);
-            lives--;
-            myGui.playSnd(0);
-            if (getLives() == 0) {
-                gameOver=true;
+            if (barrier.isVisible()){ //Si hay barrera, rebota la bola
+                barrier.setInvisible();
+                velocity.setY(velocity.getY()*-1);
+                myGui.playSnd(2);
+                score+=100;
             }
+            else{ //Si no hay barrera, el jugador pierde una vida
+                ball.setX(1 + rng.nextInt(myGui.getScrWidth() - ball.getWidth() - 1));
+                ball.setY(myGui.getScrHeight() / 3);
+                velocity.setX(xVelocity());
+                velocity.setY(20);
+                lives--;
+                myGui.playSnd(0);
+                if (getLives() == 0) {
+                    gameOver=true;
+                }
+            }
+
         }
 
         //Si la bola colisiona con la paleta, rebota
@@ -206,8 +237,7 @@ public class Game {
 
                     //Según la probabilidad, generará un PowerUp al romper un ladrillo
                     int chance = rng.nextInt(100);
-                    if (chance<26)
-                    if (createPowerup(myGui.getPUpList())) setPUpPosition();
+                    if (chance<26) if (createPowerup(myGui.getPUpList())) setPUpPosition();
                     if (brokenBricks==66){
                         gameOver=true;
                     }
@@ -221,7 +251,7 @@ public class Game {
     //Ejecuta la caida del PowerUp
     public void powerUpMovement(){
         for (PowerUp p:pupList) {
-            if (paddle.collides(p)){
+            if (paddle.collides(p) && p.isVisible()){
                 p.setInvisible();
                 score+=500;
                 setEffect(p.giveEffect());
@@ -234,6 +264,7 @@ public class Game {
     private void setEffect(String effect) {
         if(effect.equals("1up")) incrementLives();
         if(effect.equals("speed")) speedUp();
+        if(effect.equals("barrier")) setBarrier();
     }
 
     //Devuelve un angulo (velocity) aleatorio

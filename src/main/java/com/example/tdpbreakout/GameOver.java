@@ -7,6 +7,9 @@ import android.view.View;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+/*
+    @Class GameOver, genera una escena de juego terminado
+ */
 public class GameOver extends AppCompatActivity {
 
     TextView totalPoints;

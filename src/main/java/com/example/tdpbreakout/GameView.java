@@ -23,7 +23,7 @@ public class GameView extends View{
     protected Game game;
     protected Context context;
     protected Handler handler;
-    protected final long UPDATE_MILLIS=50;
+    protected final long UPDATE_MILLIS=16;
     protected Runnable runnable;
     protected Paint liveText  = new Paint();
     protected Paint scoreText = new Paint();
@@ -32,6 +32,8 @@ public class GameView extends View{
     protected LinkedList<Bitmap> brickImgBank = new LinkedList<Bitmap>();
     protected LinkedList<MediaPlayer> sndBank = new LinkedList<MediaPlayer>();
     protected LinkedList<Bitmap> powerUpImgBank = new LinkedList<Bitmap>();
+
+    protected Paint barrier = new Paint();
 
 
     public GameView(Context context){
@@ -63,10 +65,12 @@ public class GameView extends View{
         setSndBank(MediaPlayer.create(context, R.raw.sndhit));
         setSndBank(MediaPlayer.create(context, R.raw.sndpaddle));
         setSndBank(MediaPlayer.create(context, R.raw.sndwall));
+        barrier.setColor(Color.YELLOW);
         handler = new Handler();
         runnable = new Runnable() {
             @Override
-            public void run() {
+            public void run() { //Hilo que actualiza el juego en cada frame
+                updateGame();
                 invalidate();
             }
         };
@@ -105,15 +109,23 @@ public class GameView extends View{
         canvas.drawText(score, 25,50, scoreText);
     }
 
+    //Actualiza los movimientos y la lógica del juego
+    protected void updateGame(){
+        game.ballMovement();
+        game.powerUpMovement();
+    }
+
     @Override
     //OnDraw actualiza lo dibujado en pantalla en cada frame
-    protected void onDraw(Canvas canvas){
+    protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (!game.gameOver())  handler.postDelayed(runnable, UPDATE_MILLIS);
+        if (!game.gameOver()) handler.postDelayed(runnable, UPDATE_MILLIS);
         else gameOver();
-        canvas.drawColor(Color.BLACK);
-        drawScore(canvas, ""+game.getScore());
-        drawLives(canvas, ""+game.getLives());
+        drawScore(canvas, "" + game.getScore());
+        drawLives(canvas, "" + game.getLives());
+        if (game.isBarrierVisible()){
+            canvas.drawRect(0, game.getPaddle().getY(), scrWidth, game.getPaddle().getY() + game.getPaddle().getHeight(), barrier);
+        }
         canvas.drawBitmap(game.getBall().getSprite(), game.getBall().getX(), game.getBall().getY(), null);
         canvas.drawBitmap(game.getPaddle().getSprite(), game.getPaddle().getX(), game.getPaddle().getY(), null);
         for (int i=0; i<game.cantBricks(); i++) {
@@ -129,8 +141,6 @@ public class GameView extends View{
                 if (pup.isVisible()) canvas.drawBitmap(pup.getSprite(), pup.getX(), pup.getY(), null);
             }
         }
-        game.ballMovement();
-        game.powerUpMovement();
     }
 
 
@@ -142,6 +152,7 @@ public class GameView extends View{
     //Incluye un sprite recibido por parametro en el banco de sprites de powerups
     private void setPUpBank(Bitmap sprite){powerUpImgBank.add(sprite);}
 
+    //Incluye un sprite recibido por parametro en el banco de sprites de ladrillos
     private void setBrickBank(Bitmap sprite){brickImgBank.add(sprite);}
 
     //Hará una llamada a la escena de gameOver

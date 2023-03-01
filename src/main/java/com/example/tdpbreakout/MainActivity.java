@@ -6,6 +6,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 
+/*
+    @Class MainActivity, actividad principal del juego
+ */
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -17,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void StartGame(View view) {
         GameView GUI = new GameView(this);
+        GUI.setBackground(getResources().getDrawable(R.drawable.background));
         setContentView(GUI);
     }
 }

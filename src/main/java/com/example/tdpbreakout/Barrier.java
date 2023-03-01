@@ -3,12 +3,12 @@ package com.example.tdpbreakout;
 import android.graphics.Bitmap;
 
 /*
-    @Class Speed, representa el powerUp de velocidad aumentada
+    @Class Barrier, representa el powerUp barrera
  */
-public class Speed extends PowerUp{
-    private static final String effect = "speed";
+public class Barrier extends PowerUp{
+    private static final String effect = "barrier";
 
-    public Speed(Bitmap bitmap){
+    public Barrier(Bitmap bitmap){
         sprite = bitmap;
         width = sprite.getWidth();
         height = sprite.getHeight();
@@ -22,6 +22,6 @@ public class Speed extends PowerUp{
     //Setea la velocidad de caida del powerUp
     @Override
     public void fallDown() {
-        y+=8;
+        y+=12;
     }
 }
