@@ -151,7 +151,6 @@ public class Game {
         if (pupList.size() < 10) {
             PowerUp pUp;
             int probability = rng.nextInt(100);
-            Log.d("MESSI", ""+probability);
             if (probability <= 25) pUp = new Live(sprBank.get(0));
             else if (probability <= 70) pUp = new Speed(sprBank.get(1));
             else pUp = new Barrier(sprBank.get(2));
@@ -237,7 +236,7 @@ public class Game {
 
                     //Según la probabilidad, generará un PowerUp al romper un ladrillo
                     int chance = rng.nextInt(100);
-                    if (chance<26) if (createPowerup(myGui.getPUpList())) setPUpPosition();
+                    if (chance<16) if (createPowerup(myGui.getPUpList())) setPUpPosition();
                     if (brokenBricks==66){
                         gameOver=true;
                     }
